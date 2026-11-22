@@ -20,6 +20,9 @@ logged in). Trace lines from the first click on "Book" to the end:
 - `traces/v0/run-07.json`: `3. click button "Book" [ref=e58]` → `4. click button "14:00" [ref=e76]` → `5. click button "Dismiss" [ref=e104]: ×` → `6. click button "Book" [ref=e111]` → `7. click button "14:00" [ref=e129]` → `8. click button "Dismiss" [ref=e157]: ×` → `9. type textbox "Name" [ref=e162]` → `10. click button "Book" [ref=e164]` → `11. click button "14:00" [ref=e182]` → `12. done`
 - `traces/v0/run-08.json`: `8. click button "Book" [ref=e113]` → `9. click button "14:00" [ref=e131]` → `10. done`
 
+The rejection reasons given for runs 06 and 07 are inferred from the API code (`api/server.ts`):
+v0 traces did not record HTTP statuses. From v1 on, every API response is recorded in the trace.
+
 ## v0 without fault injection
 
 The first measurement, before the fault was added (full ARIA snapshot, traces in `traces/v0-no-fault/`).
