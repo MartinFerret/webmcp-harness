@@ -5,8 +5,12 @@
   "description": "A tiny agent harness: from a browser agent that lies about success to an Angular app exposing WebMCP tools. Measured.",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "build:app": "npm --prefix app run build",
+    "api": "tsx api/server.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
