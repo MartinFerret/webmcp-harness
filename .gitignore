@@ -1,0 +1,6 @@
+.env
+node_modules/
+dist/
+.angular/
+test-results/
+.DS_Store
