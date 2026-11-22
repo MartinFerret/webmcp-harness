@@ -32,7 +32,7 @@ export async function runAgent(page: Page, system: string, task: string): Promis
   const steps: Step[] = [];
 
   for (let n = 1; n <= SAFETY_CAP; n++) {
-    const snapshot = await page.ariaSnapshot({ mode: 'ai' });
+    const snapshot = trim(await page.ariaSnapshot({ mode: 'ai' }));
     const history = steps.map((s) => `${s.step}. ${s.action} ${JSON.stringify(s.args)} -> ${s.result}`).join('\n');
     const user = `Task: ${task}\n\nActions so far:\n${history || '(none)'}\n\nCurrent page:\n${snapshot}`;
 
@@ -49,6 +49,16 @@ export async function runAgent(page: Page, system: string, task: string): Promis
     record(await act(page, name, args));
   }
   return { saidDone: false, summary: '', steps };
+}
+
+/** Fewer tokens per step: keeps roles, names and states, drops link URLs, cursor hints and refs nobody can act on. */
+export function trim(snapshot: string): string {
+  return snapshot
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('- /url:'))
+    .map((line) => line.replace(' [cursor=pointer]', ''))
+    .map((line) => (/- (button|link|textbox) /.test(line) ? line : line.replace(/ \[ref=e\d+\]/, '')))
+    .join('\n');
 }
 
 /** Executes one browser action and reports what happened in a few words. */

@@ -1,0 +1,106 @@
+{
+  "version": "v0",
+  "run": 3,
+  "model": "openai/gpt-oss-20b",
+  "at": "2026-11-22T18:27:56.869Z",
+  "promptSha256": "73b1b18809357579fc2a7e639f4bbd625d5feecba7a5fe9c2409d2c48f9bf29b",
+  "taskSha256": "2960b56da66ee504a11f153f4a020223fc0bb2504c0328e312b7d63dce5bf9da",
+  "saidDone": true,
+  "reallyBooked": true,
+  "summary": "Booked Tuesday 14:00 for Alice.",
+  "steps": [
+    {
+      "step": 1,
+      "action": "click",
+      "args": {
+        "ref": "e7"
+      },
+      "target": "- link \"Log in\" [ref=e7] [cursor=pointer]:",
+      "result": "ok",
+      "tokens": 1201
+    },
+    {
+      "step": 2,
+      "action": "type",
+      "args": {
+        "ref": "e57",
+        "text": "demo@slotbook.test"
+      },
+      "target": "- textbox \"Email\" [ref=e57]",
+      "result": "ok",
+      "tokens": 596
+    },
+    {
+      "step": 3,
+      "action": "click",
+      "args": {
+        "ref": "e60"
+      },
+      "target": "- button \"Log in\" [ref=e60] [cursor=pointer]",
+      "result": "ok",
+      "tokens": 610
+    },
+    {
+      "step": 4,
+      "action": "type",
+      "args": {
+        "ref": "e59",
+        "text": "demo"
+      },
+      "target": "- textbox \"Password\" [ref=e59]",
+      "result": "ok",
+      "tokens": 796
+    },
+    {
+      "step": 5,
+      "action": "click",
+      "args": {
+        "ref": "e60"
+      },
+      "target": "- button \"Log in\" [ref=e60] [cursor=pointer]",
+      "result": "ok",
+      "tokens": 1171
+    },
+    {
+      "step": 6,
+      "action": "click",
+      "args": {
+        "ref": "e80"
+      },
+      "target": "- button \"14:00\" [ref=e80] [cursor=pointer]",
+      "result": "ok",
+      "tokens": 1287
+    },
+    {
+      "step": 7,
+      "action": "type",
+      "args": {
+        "ref": "e111",
+        "text": "Alice"
+      },
+      "target": "- textbox \"Name\" [ref=e111]",
+      "result": "ok",
+      "tokens": 677
+    },
+    {
+      "step": 8,
+      "action": "click",
+      "args": {
+        "ref": "e113"
+      },
+      "target": "- button \"Book\" [ref=e113] [cursor=pointer]",
+      "result": "ok",
+      "tokens": 647
+    },
+    {
+      "step": 9,
+      "action": "done",
+      "args": {
+        "summary": "Booked Tuesday 14:00 for Alice."
+      },
+      "target": "",
+      "result": "stopped",
+      "tokens": 1346
+    }
+  ]
+}

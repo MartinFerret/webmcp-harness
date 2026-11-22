@@ -14,6 +14,11 @@ interface Booking { day: string; time: string; name: string }
 const sessions = new Set<string>();
 let bookings: Booking[] = [];
 
+// Deliberate fault injection (see app/FRICTION.md): with FAULT_FIRST_BOOK=503,
+// the first POST /api/book after each reset answers 503, the next ones work.
+const faultStatus = () => Number(process.env['FAULT_FIRST_BOOK'] ?? 0);
+let bookCalls = 0;
+
 const STATIC_DIR = join(import.meta.dirname, '../app/dist/app/browser');
 const MIME: Record<string, string> = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.ico': 'image/x-icon',
@@ -78,6 +83,8 @@ const server = createServer(async (req, res) => {
   }
 
   if (route === 'POST /api/book') {
+    bookCalls++;
+    if (bookCalls === 1 && faultStatus()) return send(res, faultStatus(), { error: 'Service unavailable' });
     if (!isLoggedIn(req)) return send(res, 401, { error: 'Not logged in' });
     const body = await readJson(req);
     const day = String(body['day'] ?? '');
@@ -98,6 +105,7 @@ const server = createServer(async (req, res) => {
   if (route === 'GET /__state') return send(res, 200, { bookings });
   if (route === 'POST /__reset') {
     bookings = [];
+    bookCalls = 0;
     sessions.clear();
     return send(res, 200, { ok: true });
   }

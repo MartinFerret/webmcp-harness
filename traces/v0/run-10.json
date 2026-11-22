@@ -2,12 +2,13 @@
   "version": "v0",
   "run": 10,
   "model": "openai/gpt-oss-20b",
-  "at": "2026-11-22T18:33:47.145Z",
+  "at": "2026-11-22T20:03:54.281Z",
+  "faultFirstBook": "503",
   "promptSha256": "73b1b18809357579fc2a7e639f4bbd625d5feecba7a5fe9c2409d2c48f9bf29b",
   "taskSha256": "2960b56da66ee504a11f153f4a020223fc0bb2504c0328e312b7d63dce5bf9da",
   "saidDone": true,
   "reallyBooked": true,
-  "summary": "The Tuesday 14:00 slot is already booked for Alice, so no further action is needed.",
+  "summary": "Booked Tuesday 14:00 slot for Alice",
   "steps": [
     {
       "step": 1,
@@ -15,9 +16,9 @@
       "args": {
         "ref": "e7"
       },
-      "target": "- link \"Log in\" [ref=e7] [cursor=pointer]:",
+      "target": "- link \"Log in\" [ref=e7]:",
       "result": "ok",
-      "tokens": 1274
+      "tokens": 912
     },
     {
       "step": 2,
@@ -28,7 +29,7 @@
       },
       "target": "- textbox \"Email\" [ref=e57]",
       "result": "ok",
-      "tokens": 676
+      "tokens": 561
     },
     {
       "step": 3,
@@ -36,9 +37,9 @@
       "args": {
         "ref": "e60"
       },
-      "target": "- button \"Log in\" [ref=e60] [cursor=pointer]",
+      "target": "- button \"Log in\" [ref=e60]",
       "result": "ok",
-      "tokens": 600
+      "tokens": 572
     },
     {
       "step": 4,
@@ -49,7 +50,7 @@
       },
       "target": "- textbox \"Password\" [ref=e59]",
       "result": "ok",
-      "tokens": 880
+      "tokens": 653
     },
     {
       "step": 5,
@@ -57,9 +58,9 @@
       "args": {
         "ref": "e60"
       },
-      "target": "- button \"Log in\" [ref=e60] [cursor=pointer]",
+      "target": "- button \"Log in\" [ref=e60]",
       "result": "ok",
-      "tokens": 788
+      "tokens": 974
     },
     {
       "step": 6,
@@ -67,9 +68,9 @@
       "args": {
         "ref": "e80"
       },
-      "target": "- button \"14:00\" [ref=e80] [cursor=pointer]",
+      "target": "- button \"14:00\" [ref=e80]",
       "result": "ok",
-      "tokens": 1352
+      "tokens": 977
     },
     {
       "step": 7,
@@ -80,7 +81,7 @@
       },
       "target": "- textbox \"Name\" [ref=e111]",
       "result": "ok",
-      "tokens": 651
+      "tokens": 616
     },
     {
       "step": 8,
@@ -88,29 +89,60 @@
       "args": {
         "ref": "e113"
       },
-      "target": "- button \"Book\" [ref=e113] [cursor=pointer]",
+      "target": "- button \"Book\" [ref=e113]",
       "result": "ok",
-      "tokens": 660
+      "tokens": 573
     },
     {
       "step": 9,
       "action": "click",
       "args": {
-        "ref": "e159"
+        "ref": "e131"
       },
-      "target": "- button \"Dismiss\" [ref=e159] [cursor=pointer]: ×",
+      "target": "- button \"14:00\" [ref=e131]",
       "result": "ok",
-      "tokens": 1386
+      "tokens": 1524
     },
     {
       "step": 10,
+      "action": "click",
+      "args": {
+        "ref": "e159"
+      },
+      "target": "- button \"Dismiss\" [ref=e159]: ×",
+      "result": "ok",
+      "tokens": 665
+    },
+    {
+      "step": 11,
+      "action": "type",
+      "args": {
+        "ref": "e164",
+        "text": "Alice"
+      },
+      "target": "- textbox \"Name\" [ref=e164]",
+      "result": "ok",
+      "tokens": 701
+    },
+    {
+      "step": 12,
+      "action": "click",
+      "args": {
+        "ref": "e166"
+      },
+      "target": "- button \"Book\" [ref=e166]",
+      "result": "ok",
+      "tokens": 632
+    },
+    {
+      "step": 13,
       "action": "done",
       "args": {
-        "summary": "The Tuesday 14:00 slot is already booked for Alice, so no further action is needed."
+        "summary": "Booked Tuesday 14:00 slot for Alice"
       },
       "target": "",
       "result": "stopped",
-      "tokens": 1305
+      "tokens": 1303
     }
   ]
 }
