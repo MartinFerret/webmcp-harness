@@ -2,6 +2,8 @@
 
 A browser agent that says "done" when nothing was booked, and a small harness, built one part at a time, that stops believing it: every number here comes from a real run whose trace is committed.
 
+**Status:** v0 to v2 measured. v3 (WebMCP tools) is next.
+
 ---
 
 ## The failure
