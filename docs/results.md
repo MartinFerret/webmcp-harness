@@ -8,6 +8,7 @@ Every run has deliberate fault injection on: the first `POST /api/book` answers 
 | Version | Runs | Said done | Really booked | False successes |
 | --- | --- | --- | --- | --- |
 | v0 | 10 | 10 | 6 | 4 |
+| v1 | 10 | 10 | 7 | 3 |
 
 Notes: in the 4 false successes of v0, the last thing the agent did before declaring done was to reopen
 the still-free Tuesday 14:00 slot (twice also retyping the name), with no successful booking behind it.

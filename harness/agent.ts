@@ -1,13 +1,13 @@
-// v0: the naive click agent.
-// Loop: ARIA snapshot of the page -> the model picks one action -> repeat until "done".
+// The agent loop: ARIA snapshot of the page -> the model picks one action -> repeat until "done".
+// v0: the naive loop, with a safety cap of 30 steps.
+// v1: a real step limit, and every step is handed to onStep so it can be traced as it happens.
 // Snapshot docs: https://playwright.dev/docs/aria-snapshots
 import type { Page } from 'playwright';
 import { ask, type Tool } from './model.ts';
 
 export interface Step { step: number; action: string; args: Record<string, unknown>; target: string; result: string; tokens: number }
 export interface Outcome { saidDone: boolean; summary: string; steps: Step[] }
-
-const SAFETY_CAP = 30;
+export interface Harness { maxSteps: number; onStep?: (step: Step) => void }
 
 const tool = (name: string, description: string, props: Record<string, string>): Tool => ({
   type: 'function',
@@ -28,10 +28,10 @@ const TOOLS: Tool[] = [
   tool('done', 'Declare the task finished.', { summary: 'One sentence about what was done' }),
 ];
 
-export async function runAgent(page: Page, system: string, task: string): Promise<Outcome> {
+export async function runAgent(page: Page, system: string, task: string, harness: Harness): Promise<Outcome> {
   const steps: Step[] = [];
 
-  for (let n = 1; n <= SAFETY_CAP; n++) {
+  for (let n = 1; n <= harness.maxSteps; n++) {
     const snapshot = trim(await page.ariaSnapshot({ mode: 'ai' }));
     const history = steps.map((s) => `${s.step}. ${s.action} ${JSON.stringify(s.args)} -> ${s.result}`).join('\n');
     const user = `Task: ${task}\n\nActions so far:\n${history || '(none)'}\n\nCurrent page:\n${snapshot}`;
@@ -40,7 +40,11 @@ export async function runAgent(page: Page, system: string, task: string): Promis
     const { name, args } = reply.call ?? { name: 'none', args: {} };
     // The snapshot line the model pointed at, kept only to make traces readable.
     const target = snapshot.split('\n').find((line) => line.includes(`[ref=${String(args['ref'])}]`))?.trim() ?? '';
-    const record = (result: string) => steps.push({ step: n, action: name, args, target, result, tokens: reply.tokens });
+    const record = (result: string) => {
+      const step: Step = { step: n, action: name, args, target, result, tokens: reply.tokens };
+      steps.push(step);
+      harness.onStep?.(step);
+    };
 
     if (name === 'done') {
       record('stopped');
