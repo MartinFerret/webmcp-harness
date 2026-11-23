@@ -3,4 +3,5 @@ node_modules/
 dist/
 .angular/
 test-results/
+runs/
 .DS_Store

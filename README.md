@@ -73,6 +73,7 @@ harness/            ← the agent harness, one numbered file per part
 api/server.ts       ← SlotBook's API (in memory), also serves the built app
 app/                ← SlotBook, the Angular 22 app the agent operates
 traces/             ← one file per run, the raw material of every number below
+tests/              ← replays of each version with a scripted model, and unit tests
 docs/results.md     ← the results table, generated from traces/
 ```
 
@@ -91,7 +92,7 @@ task → [tools + context + guardrails + loop + verify] → trace + result
 | `5-loop.ts` | Agent loop | Snapshot → model picks one action → act → repeat, until "done" is accepted or a guardrail ends the run. |
 | `6-verify.ts` | Verify | Reads the real bookings from the API and answers whether Alice has Tuesday 14:00. The agent never sees this state, only a refusal. |
 | `8-harness.ts` | The harness | Owns the run: starts SlotBook, opens the browser, resets the app, plugs each version's parts into the loop, writes the trace, closes the browser. |
-| `9-index.ts` | CLI | `npm run agent -- <version> <runs>`: one line per run in the terminal. |
+| `9-index.ts` | CLI | `npm run agent -- <version> <runs> [--out <dir>]`: one line per run in the terminal, traces in a fresh folder under `runs/` unless `--out` says otherwise. |
 | `report.ts` | Report | `npm run report`: rebuilds `docs/results.md` from `traces/`. Not a harness part. |
 
 There is no `7-` file yet. That number belongs to the WebMCP part, which arrives with v3 and its measurements.
@@ -193,15 +194,16 @@ cp .env.example .env        # then add your GROQ_API_KEY
 npm run build:app
 ```
 
-Then run a version. A run whose trace is already complete is skipped, so a batch that stops halfway can be resumed with the same command. For the same reason, the ten committed runs of each version will be skipped: move them aside first.
+Then run a version:
 
 ```sh
-mv traces/v2 /tmp/v2-committed   # or delete it: git checkout traces/v2 brings it back
-npm run agent -- v2 10           # ten runs of v2, one line each
-npm run report                   # rebuild docs/results.md from traces/
+npm run agent -- v2 10      # ten runs of v2, one line each
+npm test                    # replays every version with a scripted model, no tokens
 ```
 
-- Traces go to `traces/<version>/run-NN.jsonl`. The committed traces are the measurement behind the table above; your own runs will give your own numbers.
+- Your traces go to a fresh, timestamped folder under `runs/` (gitignored), printed on the first line. The committed traces in `traces/` are never skipped or overwritten.
+- `--out <dir>` picks the folder. In a folder that already has traces, complete runs are skipped, so a batch that stops halfway resumes with the same command. The measured batches were written this way: `npm run agent -- v2 10 --out traces/v2`.
+- `npm run report` rebuilds `docs/results.md` from `traces/` only.
 - To use the app by hand: `npm run api`, then open http://localhost:4300. The demo account is shown on the login page. The fault is off in that mode; turn it on with `FAULT_FIRST_BOOK=503 npm run api`.
 - Free tier budget: the 10 runs of one version used between 96,737 and 133,634 tokens here, against a limit of 200,000 tokens per day. One version per day fits; two do not.
 
