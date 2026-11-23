@@ -227,8 +227,4 @@ npm test                    # replays every version with a scripted model, no to
 - Playwright, [ARIA snapshots](https://playwright.dev/docs/aria-snapshots): how the agent sees the page and points at elements.
 - Groq, [OpenAI compatibility](https://console.groq.com/docs/openai) and [tool use](https://console.groq.com/docs/tool-use): how the model is called.
 
-## Credits
-
-Inspired by Tejas Kumar's talk [Harnesses in AI: A Deep Dive](https://www.youtube.com/watch?v=C_GG5g38vLU) and his repo [basically-ai-harness](https://github.com/TejasQ/basically-ai-harness), whose one-numbered-file-per-part layout this repo follows. The code, the app and the measurements here are this repo's own.
-
 MIT license.
