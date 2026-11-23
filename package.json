@@ -12,6 +12,7 @@
     "build:app": "npm --prefix app run build",
     "api": "tsx api/server.ts",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test --test-force-exit tests/*.test.ts",
     "agent": "tsx harness/9-index.ts",
     "report": "tsx harness/report.ts"
   },

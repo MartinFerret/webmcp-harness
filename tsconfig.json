@@ -14,5 +14,5 @@
     "allowImportingTsExtensions": true,
     "types": ["node"]
   },
-  "include": ["api", "harness"]
+  "include": ["api", "harness", "tests"]
 }
