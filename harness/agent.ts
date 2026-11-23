@@ -1,13 +1,21 @@
 // The agent loop: ARIA snapshot of the page -> the model picks one action -> repeat until "done".
 // v0: the naive loop, with a safety cap of 30 steps.
 // v1: a real step limit, and every step is handed to onStep so it can be traced as it happens.
+// v2: when the agent says done, the harness checks the outcome first and may refuse.
 // Snapshot docs: https://playwright.dev/docs/aria-snapshots
 import type { Page } from 'playwright';
 import { ask, type Tool } from './model.ts';
 
 export interface Step { step: number; action: string; args: Record<string, unknown>; target: string; result: string; tokens: number }
-export interface Outcome { saidDone: boolean; summary: string; steps: Step[] }
-export interface Harness { maxSteps: number; onStep?: (step: Step) => void }
+export interface Outcome { saidDone: boolean; summary: string; steps: Step[]; refusals: number }
+export interface Harness {
+  maxSteps: number;
+  onStep?: (step: Step) => void;
+  /** Returns null when the task is really done, or a short factual message when it is not. */
+  checkOutcome?: () => Promise<string | null>;
+}
+
+const MAX_REFUSALS = 3;
 
 const tool = (name: string, description: string, props: Record<string, string>): Tool => ({
   type: 'function',
@@ -30,6 +38,7 @@ const TOOLS: Tool[] = [
 
 export async function runAgent(page: Page, system: string, task: string, harness: Harness): Promise<Outcome> {
   const steps: Step[] = [];
+  let refusals = 0;
 
   for (let n = 1; n <= harness.maxSteps; n++) {
     const snapshot = trim(await page.ariaSnapshot({ mode: 'ai' }));
@@ -47,12 +56,22 @@ export async function runAgent(page: Page, system: string, task: string, harness
     };
 
     if (name === 'done') {
-      record('stopped');
-      return { saidDone: true, summary: String(args['summary'] ?? ''), steps };
+      const problem = (await harness.checkOutcome?.()) ?? null;
+      if (problem === null) {
+        record('stopped');
+        return { saidDone: true, summary: String(args['summary'] ?? ''), steps, refusals };
+      }
+      if (refusals === MAX_REFUSALS) {
+        record(`refused: ${problem}. Run ended: too many refusals.`);
+        break;
+      }
+      refusals++;
+      record(`refused: ${problem}`);
+      continue;
     }
     record(await act(page, name, args));
   }
-  return { saidDone: false, summary: '', steps };
+  return { saidDone: false, summary: '', steps, refusals };
 }
 
 /** Fewer tokens per step: keeps roles, names and states, drops link URLs, cursor hints and refs nobody can act on. */

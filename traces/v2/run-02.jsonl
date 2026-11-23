@@ -1,0 +1,32 @@
+{"type":"start","version":"v2","run":2,"model":"openai/gpt-oss-20b","at":"2026-11-23T08:15:58.000Z","maxSteps":20,"faultFirstBook":"503","promptSha256":"73b1b18809357579fc2a7e639f4bbd625d5feecba7a5fe9c2409d2c48f9bf29b","taskSha256":"2960b56da66ee504a11f153f4a020223fc0bb2504c0328e312b7d63dce5bf9da"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:15:58.001Z"}
+{"type":"step","step":1,"action":"click","args":{"ref":"e7"},"target":"- link \"Log in\" [ref=e7]:","result":"ok","tokens":922}
+{"type":"step","step":2,"action":"type","args":{"ref":"e57","text":"demo@slotbook.test"},"target":"- textbox \"Email\" [ref=e57]","result":"ok","tokens":564}
+{"type":"step","step":3,"action":"type","args":{"ref":"e59","text":"demo"},"target":"- textbox \"Password\" [ref=e59]","result":"ok","tokens":568}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:16:07.398Z"}
+{"type":"step","step":4,"action":"click","args":{"ref":"e4"},"target":"- link \"SlotBook\" [ref=e4]:","result":"ok","tokens":750}
+{"type":"step","step":5,"action":"click","args":{"ref":"e77"},"target":"- button \"14:00\" [ref=e77]","result":"ok","tokens":1013}
+{"type":"step","step":6,"action":"type","args":{"ref":"e108","text":"Alice"},"target":"- textbox \"Name\" [ref=e108]","result":"ok","tokens":642}
+{"type":"http","method":"POST","path":"/api/book","status":503,"at":"2026-11-23T08:16:18.929Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:16:18.932Z"}
+{"type":"step","step":7,"action":"click","args":{"ref":"e110"},"target":"- button \"Book\" [ref=e110]","result":"ok","tokens":556}
+{"type":"step","step":8,"action":"click","args":{"ref":"e156"},"target":"- button \"Dismiss\" [ref=e156]: ×","result":"ok","tokens":1152}
+{"type":"step","step":9,"action":"click","args":{"ref":"e128"},"target":"- button \"14:00\" [ref=e128]","result":"ok","tokens":1134}
+{"type":"step","step":10,"action":"type","args":{"ref":"e161","text":"Alice"},"target":"- textbox \"Name\" [ref=e161]","result":"ok","tokens":908}
+{"type":"http","method":"POST","path":"/api/book","status":401,"at":"2026-11-23T08:16:39.844Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:16:39.847Z"}
+{"type":"step","step":11,"action":"click","args":{"ref":"e163"},"target":"- button \"Book\" [ref=e163]","result":"ok","tokens":620}
+{"type":"step","step":12,"action":"click","args":{"ref":"e209"},"target":"- button \"Dismiss\" [ref=e209]: ×","result":"ok","tokens":1098}
+{"type":"step","step":13,"action":"click","args":{"ref":"e181"},"target":"- button \"14:00\" [ref=e181]","result":"ok","tokens":1101}
+{"type":"step","step":14,"action":"type","args":{"ref":"e214","text":"Alice"},"target":"- textbox \"Name\" [ref=e214]","result":"ok","tokens":712}
+{"type":"http","method":"POST","path":"/api/book","status":401,"at":"2026-11-23T08:16:59.076Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:16:59.079Z"}
+{"type":"step","step":15,"action":"click","args":{"ref":"e216"},"target":"- button \"Book\" [ref=e216]","result":"ok","tokens":645}
+{"type":"step","step":16,"action":"click","args":{"ref":"e262"},"target":"- button \"Dismiss\" [ref=e262]: ×","result":"ok","tokens":1247}
+{"type":"step","step":17,"action":"click","args":{"ref":"e234"},"target":"- button \"14:00\" [ref=e234]","result":"ok","tokens":1156}
+{"type":"step","step":18,"action":"type","args":{"ref":"e267","text":"Alice"},"target":"- textbox \"Name\" [ref=e267]","result":"ok","tokens":819}
+{"type":"http","method":"POST","path":"/api/book","status":401,"at":"2026-11-23T08:17:21.225Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-23T08:17:21.228Z"}
+{"type":"step","step":19,"action":"click","args":{"ref":"e269"},"target":"- button \"Book\" [ref=e269]","result":"ok","tokens":722}
+{"type":"step","step":20,"action":"click","args":{"ref":"e315"},"target":"- button \"Dismiss\" [ref=e315]: ×","result":"ok","tokens":1233}
+{"type":"result","saidDone":false,"reallyBooked":false,"summary":"","refusals":0,"steps":20,"tokens":17562}
