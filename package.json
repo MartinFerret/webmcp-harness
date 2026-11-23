@@ -12,7 +12,7 @@
     "build:app": "npm --prefix app run build",
     "api": "tsx api/server.ts",
     "typecheck": "tsc --noEmit",
-    "agent": "tsx harness/run.ts",
+    "agent": "tsx harness/9-index.ts",
     "report": "tsx harness/report.ts"
   },
   "dependencies": {

@@ -18,7 +18,7 @@ With `FAULT_FIRST_BOOK=503`, the first `POST /api/book` after each reset
 answers `503 Service unavailable`. Every later call works normally.
 
 - It is deterministic: no randomness, the same fault in every run.
-- It is on by default for agent runs (`npm run agent`, set in `harness/run.ts`)
+- It is on by default for agent runs (`npm run agent`, set in `harness/8-harness.ts`)
   and applies to every harness version, v0 to v3, without exception.
 - It is off by default when you start the app by hand (`npm run api`).
   Turn it on with `FAULT_FIRST_BOOK=503 npm run api`, or off for a run with

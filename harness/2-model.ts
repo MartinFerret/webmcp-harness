@@ -1,8 +1,9 @@
-// The only file that talks to the model: Groq through the OpenAI Node SDK.
+// Part 2, the model: the only file that talks to it. Groq through the OpenAI Node SDK.
 // Groq's OpenAI-compatible endpoint: https://console.groq.com/docs/openai
 // Model ids (openai/gpt-oss-20b):     https://console.groq.com/docs/models
 // Tool calling:                       https://console.groq.com/docs/tool-use
 import OpenAI from 'openai';
+import type { Tool } from './1-tools.ts';
 
 try {
   process.loadEnvFile(); // reads .env (gitignored)
@@ -13,7 +14,6 @@ try {
 export const MODEL = process.env['GROQ_MODEL'] ?? 'openai/gpt-oss-20b';
 
 export type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
-export type Tool = OpenAI.Chat.Completions.ChatCompletionFunctionTool;
 export interface ToolCall { name: string; args: Record<string, unknown> }
 export interface Reply { call: ToolCall | null; text: string; tokens: number }
 
