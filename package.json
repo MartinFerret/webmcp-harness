@@ -15,7 +15,8 @@
     "test": "node --import tsx --test --test-force-exit tests/*.test.ts",
     "agent": "tsx harness/9-index.ts",
     "demo": "tsx harness/demo.ts",
-    "report": "tsx harness/report.ts"
+    "report": "tsx harness/report.ts",
+    "screenshots": "tsx harness/screenshots.ts"
   },
   "dependencies": {
     "openai": "^7.62.0",

@@ -10,6 +10,10 @@ A browser agent that says "done" when nothing was booked, and a small harness, b
 
 The task is one sentence: *"Book the Tuesday 14:00 slot for Alice."* The agent drives a small Angular booking app (SlotBook) through clicks and typing.
 
+| The calendar | The booking form |
+|---|---|
+| ![SlotBook calendar: five days, six slots each](docs/screenshots/1-calendar.png) | ![Booking form for Tuesday 14:00 with the name Alice typed in](docs/screenshots/2-booking-form.png) |
+
 This is the end of `traces/v0/run-05.json`, steps 6 to 11, one step per line:
 
 ```json
@@ -30,6 +34,12 @@ And the last fields of the same file:
 ```
 
 What happened: at step 8 the agent clicked "Book" and the API rejected the booking (see [Results](#results) for why). The app showed a "Booked!" message anyway. Back on the calendar, the 14:00 slot was still free, so the agent opened it again (step 9), typed the name again (step 10), never clicked "Book" a second time, and declared the task done.
+
+This is what the app shows at that moment. The API has just answered 503 and holds no booking; the page says "Booked!" and Tuesday 14:00 is still free:
+
+![SlotBook calendar with a "Booked!" message while Tuesday 14:00 is still free](docs/screenshots/3-false-booked-toast.png)
+
+The three screenshots come from the real app, with the same injected fault as the agent runs: `npm run screenshots` retakes them.
 
 Every click returned `ok`. Nothing crashed. The only thing wrong is the answer.
 
@@ -79,6 +89,7 @@ app/                ← SlotBook, the Angular 22 app the agent operates
 traces/             ← one file per run, the raw material of every number below
 tests/              ← replays of each version with a scripted model, and unit tests
 docs/results.md     ← the results table, generated from traces/
+docs/screenshots/   ← the screenshots above, taken by harness/screenshots.ts
 ```
 
 ### `harness/`: read the files in order
@@ -99,6 +110,7 @@ task → [tools + context + guardrails + loop + verify + page tools] → trace +
 | `8-harness.ts` | The harness | Owns the run: starts SlotBook, opens the browser, resets the app, plugs each version's parts into the loop, writes the trace, closes the browser. |
 | `9-index.ts` | CLI | `npm run agent -- <version> <runs> [--out <dir>]`: one line per run in the terminal, traces in a fresh folder under `runs/` unless `--out` says otherwise. |
 | `demo.ts` | Demo | `npm run demo -- <version>`: one run in a visible, slowed-down browser, each step and each API answer printed as it happens. Not a harness part. |
+| `screenshots.ts` | Screenshots | `npm run screenshots`: retakes the README screenshots from the real app, by script, with no model call. Not a harness part. |
 | `report.ts` | Report | `npm run report`: rebuilds `docs/results.md` from `traces/`. Not a harness part. |
 
 On the app side, the tool is declared in `app/src/app/webmcp.ts` with Angular's experimental WebMCP API: `bookSlot(person, day, time)` checks its input, makes the same API call as the "Book" button, and returns what the API really answered, for example `Not booked: Not logged in.` It gets no shortcut: the same login requirement, the same injected fault.
