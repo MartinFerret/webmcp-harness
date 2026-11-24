@@ -47,12 +47,17 @@ function row(label: string, results: Result[]): string {
   return `| ${label} | ${results.length} | ${count((r) => r.saidDone)} | ${count((r) => r.reallyBooked)} | ${count(falseSuccess)} | ${steps} | ${tokens} |`;
 }
 
-/** For each run that did not end with an accepted "done": every login and booking answer, every "Book" click and every "done". */
+const BROWSER_ACTIONS = ['click', 'type', 'done', 'none'];
+/** Calls to a tool exposed by the page (v3), as opposed to click, type and done. */
+const pageToolCalls = (r: Result) => r.steps.filter((s) => !BROWSER_ACTIONS.includes(s.action));
+
+/** For each run that did not end with an accepted "done": every login and booking answer, every "Book" click, page tool call and "done". */
 function quoteUnfinished(dir: string, results: Result[]): string[] {
   return results.filter((r) => !r.saidDone).map((r) => {
     const quoted = r.events.flatMap((e) => {
       if (e.type === 'http') return e.method === 'POST' ? [`${e.method} ${e.path} ${e.status}`] : [];
       if (e.action === 'done') return [`${e.step}. done -> ${e.result}`];
+      if (!BROWSER_ACTIONS.includes(e.action)) return [`${e.step}. ${e.action} -> ${e.result}`];
       return e.target.includes('button "Book"') ? [`${e.step}. ${e.action} ${e.target.replace(/^- /, '')}`] : [];
     });
     return `- \`traces/${dir}/${r.file}\` (${r.steps.length} steps): \`${quoted.join('` → `')}\``;
@@ -73,6 +78,31 @@ const byVersion = new Map<string, Result[]>();
 for (const v of versions) byVersion.set(v, await load(v));
 const v0 = byVersion.get('v0') ?? [];
 const v2 = byVersion.get('v2') ?? [];
+const v3 = byVersion.get('v3') ?? [];
+
+/** What the page tool was used for in v3, counted from the traces. */
+function v3Notes(): string[] {
+  if (v3.length === 0) return [];
+  const calls = v3.flatMap(pageToolCalls);
+  const answers = new Map<string, number>();
+  for (const call of calls) answers.set(call.result, (answers.get(call.result) ?? 0) + 1);
+  const booked = v3.filter((r) => r.reallyBooked);
+  const bookedByTool = booked.filter((r) => pageToolCalls(r).some((s) => s.result.startsWith('Booked')));
+  const first = v3.filter((r) => r.steps[0] && !BROWSER_ACTIONS.includes(r.steps[0].action));
+  return [
+    `Notes on v3: the page's \`bookSlot\` tool was called ${calls.length} times, in ${v3.filter((r) => pageToolCalls(r).length > 0).length} of ${v3.length} runs, never more than`,
+    `${Math.max(...v3.map((r) => pageToolCalls(r).length))} time per run, and as the very first action in ${first.length} runs. What it answered:`,
+    '',
+    ...[...answers].map(([answer, n]) => `- \`${answer}\` (${n}×)`),
+    '',
+    `Of the ${booked.length} bookings that exist, ${bookedByTool.length} were made through the tool and ${booked.length - bookedByTool.length} by clicking "Book".`,
+    'The first booking request of a run always gets the injected 503, whether it comes from the tool or from',
+    'the button. The runs that did not end with "done" (same quoting as for v2):',
+    '',
+    ...quoteUnfinished('v3', v3),
+    '',
+  ];
+}
 
 const table = [
   '# Results',
@@ -108,6 +138,7 @@ const table = [
   '',
   ...quoteUnfinished('v2', v2),
   '',
+  ...v3Notes(),
   '## v0 without fault injection',
   '',
   'The first measurement, before the fault was added (full ARIA snapshot, traces in `traces/v0-no-fault/`).',

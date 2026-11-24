@@ -31,7 +31,7 @@ import { Api, type Slot } from './api';
 })
 export class Calendar {
   private readonly api = inject(Api);
-  private readonly slots = resource({ loader: () => this.api.slots() });
+  private readonly slots = resource({ params: () => this.api.attempts(), loader: () => this.api.slots() });
 
   /** Slots grouped by day, in API order: one column per day. */
   protected readonly columns = computed(() => {

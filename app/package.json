@@ -15,6 +15,7 @@
     "@angular/core": "^22.3.0",
     "@angular/platform-browser": "^22.3.0",
     "@angular/router": "^22.3.0",
+    "@w3c/webmcp-polyfill": "^0.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

@@ -10,6 +10,7 @@ Every run has deliberate fault injection on: the first `POST /api/book` answers 
 | v0 | 10 | 10 | 6 | 4 | 13 | 10582.5 |
 | v1 | 10 | 10 | 7 | 3 | 13 | 10749.5 |
 | v2 | 10 | 8 | 8 | 0 | 14.5 | 12302 |
+| v3 | 10 | 7 | 7 | 0 | 14 | 13613 |
 
 Notes: in the 4 false successes of v0, the last thing the agent did before declaring done was to reopen
 the still-free Tuesday 14:00 slot (twice also retyping the name), with no successful booking behind it.
@@ -37,6 +38,20 @@ on "Book" and every "done"; an API answer is written just before the step that c
 
 - `traces/v2/run-02.jsonl` (20 steps): `POST /api/book 503` → `7. click button "Book" [ref=e110]` → `POST /api/book 401` → `11. click button "Book" [ref=e163]` → `POST /api/book 401` → `15. click button "Book" [ref=e216]` → `POST /api/book 401` → `19. click button "Book" [ref=e269]`
 - `traces/v2/run-09.jsonl` (20 steps): `POST /api/login 401` → `POST /api/book 503` → `8. click button "Book" [ref=e111]` → `POST /api/book 401` → `12. click button "Book" [ref=e164]` → `14. done -> refused: No booking found for Alice on Tuesday 14:00` → `POST /api/book 401` → `16. click button "Book" [ref=e217]` → `POST /api/book 401` → `20. click button "Book" [ref=e268]`
+
+Notes on v3: the page's `bookSlot` tool was called 8 times, in 8 of 10 runs, never more than
+1 time per run, and as the very first action in 5 runs. What it answered:
+
+- `Not booked: Service unavailable.` (7×)
+- `Not booked: Not logged in.` (1×)
+
+Of the 7 bookings that exist, 0 were made through the tool and 7 by clicking "Book".
+The first booking request of a run always gets the injected 503, whether it comes from the tool or from
+the button. The runs that did not end with "done" (same quoting as for v2):
+
+- `traces/v3/run-01.jsonl` (20 steps): `POST /api/book 503` → `7. click button "Book" [ref=e110]` → `POST /api/book 401` → `9. click button "Book" [ref=e163]` → `POST /api/book 401` → `12. click button "Book" [ref=e214]` → `POST /api/book 401` → `15. click button "Book" [ref=e267]` → `POST /api/book 401` → `17. click button "Book" [ref=e318]`
+- `traces/v3/run-03.jsonl` (20 steps): `POST /api/book 503` → `1. bookSlot -> Not booked: Service unavailable.` → `POST /api/book 401` → `4. click button "Book" [ref=e98]` → `6. done -> refused: No booking found for Alice on Tuesday 14:00` → `POST /api/book 401` → `7. click button "Book" [ref=e151]` → `POST /api/book 401` → `12. click button "Book" [ref=e202]` → `POST /api/book 401` → `16. click button "Book" [ref=e255]` → `18. done -> refused: No booking found for Alice on Tuesday 14:00` → `POST /api/book 401` → `20. click button "Book" [ref=e308]`
+- `traces/v3/run-06.jsonl` (20 steps): `POST /api/book 503` → `3. click button "Book" [ref=e58]` → `POST /api/book 401` → `6. click button "Book" [ref=e111]` → `POST /api/book 401` → `9. click button "Book" [ref=e162]` → `11. done -> refused: No booking found for Alice on Tuesday 14:00` → `POST /api/book 401` → `13. click button "Book" [ref=e213]` → `POST /api/book 401` → `17. bookSlot -> Not booked: Not logged in.` → `POST /api/login 200`
 
 ## v0 without fault injection
 

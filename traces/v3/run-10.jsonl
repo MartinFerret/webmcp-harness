@@ -1,0 +1,19 @@
+{"type":"start","version":"v3","run":10,"model":"openai/gpt-oss-20b","at":"2026-11-24T08:19:23.032Z","maxSteps":20,"faultFirstBook":"503","promptSha256":"73b1b18809357579fc2a7e639f4bbd625d5feecba7a5fe9c2409d2c48f9bf29b","taskSha256":"2960b56da66ee504a11f153f4a020223fc0bb2504c0328e312b7d63dce5bf9da"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-24T08:19:23.032Z"}
+{"type":"http","method":"POST","path":"/api/book","status":503,"at":"2026-11-24T08:19:30.389Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-24T08:19:30.391Z"}
+{"type":"step","step":1,"action":"bookSlot","args":{"day":"Tuesday","person":"Alice","time":"14:00"},"target":"","result":"Not booked: Service unavailable.","tokens":1125}
+{"type":"step","step":2,"action":"click","args":{"ref":"e7"},"target":"- link \"Log in\" [ref=e7]:","result":"ok","tokens":1119}
+{"type":"step","step":3,"action":"type","args":{"ref":"e97","text":"demo@slotbook.test"},"target":"- textbox \"Email\" [ref=e97]","result":"ok","tokens":734}
+{"type":"step","step":4,"action":"type","args":{"ref":"e99","text":"demo"},"target":"- textbox \"Password\" [ref=e99]","result":"ok","tokens":690}
+{"type":"http","method":"POST","path":"/api/login","status":200,"at":"2026-11-24T08:19:44.124Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-24T08:19:44.130Z"}
+{"type":"step","step":5,"action":"click","args":{"ref":"e100"},"target":"- button \"Log in\" [ref=e100]","result":"ok","tokens":719}
+{"type":"step","step":6,"action":"click","args":{"ref":"e119"},"target":"- button \"14:00\" [ref=e119]","result":"ok","tokens":1077}
+{"type":"step","step":7,"action":"type","args":{"ref":"e150","text":"Alice"},"target":"- textbox \"Name\" [ref=e150]","result":"ok","tokens":688}
+{"type":"http","method":"POST","path":"/api/book","status":201,"at":"2026-11-24T08:19:56.475Z"}
+{"type":"http","method":"GET","path":"/api/slots","status":200,"at":"2026-11-24T08:19:56.476Z"}
+{"type":"step","step":8,"action":"click","args":{"ref":"e152"},"target":"- button \"Book\" [ref=e152]","result":"ok","tokens":662}
+{"type":"step","step":9,"action":"click","args":{"ref":"e198"},"target":"- button \"Dismiss\" [ref=e198]: ×","result":"ok","tokens":1235}
+{"type":"step","step":10,"action":"done","args":{"summary":"The Tuesday 14:00 slot for Alice is already booked."},"target":"","result":"stopped","tokens":1194}
+{"type":"result","saidDone":true,"reallyBooked":true,"summary":"The Tuesday 14:00 slot for Alice is already booked.","refusals":0,"steps":10,"tokens":9243}

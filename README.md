@@ -2,7 +2,7 @@
 
 A browser agent that says "done" when nothing was booked, and a small harness, built one part at a time, that stops believing it: every number here comes from a real run whose trace is committed.
 
-**Status:** v0 to v2 measured. v3 (WebMCP tools) is next.
+**Status:** v0 to v3 measured, ten runs each.
 
 ---
 
@@ -62,6 +62,8 @@ shasum -a 256 prompts/system.md tasks/book.md
 npx tsx -e "import('./harness/1-tools.ts').then(async (m) => console.log((await import('node:crypto')).createHash('sha256').update(JSON.stringify(m.TOOLS)).digest('hex')))"
 ```
 
+v3 sends those same three definitions plus the one tool the page exposes, `bookSlot` (four definitions, SHA-256 `630960d85402f4a446bed6cb49209b309d0338b1d4b2102e4d6e246d54c3eab1`). `npm test` checks all of these hashes.
+
 The model is `openai/gpt-oss-20b` on Groq's free tier, with default sampling settings, for every run.
 
 ---
@@ -82,7 +84,7 @@ docs/results.md     ← the results table, generated from traces/
 ### `harness/`: read the files in order
 
 ```
-task → [tools + context + guardrails + loop + verify] → trace + result
+task → [tools + context + guardrails + loop + verify + page tools] → trace + result
 ```
 
 | File | Part | What it does |
@@ -93,21 +95,23 @@ task → [tools + context + guardrails + loop + verify] → trace + result
 | `4-guardrails.ts` | Guardrails | The step limit, and the limit on how many times "done" may be refused. |
 | `5-loop.ts` | Agent loop | Snapshot → model picks one action → act → repeat, until "done" is accepted or a guardrail ends the run. |
 | `6-verify.ts` | Verify | Reads the real bookings from the API and answers whether Alice has Tuesday 14:00. The agent never sees this state, only a refusal. |
+| `7-webmcp.ts` | WebMCP | Asks the page which tools it exposes (`document.modelContext`), offers them to the model next to `click`, `type` and `done`, and calls them in the page. The tool's answer goes back to the agent word for word, and into the trace. |
 | `8-harness.ts` | The harness | Owns the run: starts SlotBook, opens the browser, resets the app, plugs each version's parts into the loop, writes the trace, closes the browser. |
 | `9-index.ts` | CLI | `npm run agent -- <version> <runs> [--out <dir>]`: one line per run in the terminal, traces in a fresh folder under `runs/` unless `--out` says otherwise. |
 | `report.ts` | Report | `npm run report`: rebuilds `docs/results.md` from `traces/`. Not a harness part. |
 
-There is no `7-` file yet. That number belongs to the WebMCP part, which arrives with v3 and its measurements.
+On the app side, the tool is declared in `app/src/app/webmcp.ts` with Angular's experimental WebMCP API: `bookSlot(person, day, time)` checks its input, makes the same API call as the "Book" button, and returns what the API really answered, for example `Not booked: Not logged in.` It gets no shortcut: the same login requirement, the same injected fault.
 
 ### Versions are flags, not copies
 
 All versions run the same loop. `8-harness.ts` only switches parts on:
 
-| Version | Step limit | Outcome check before "done" |
-|---|---|---|
-| v0 | 30 (safety cap) | no |
-| v1 | 20 | no |
-| v2 | 20 | yes |
+| Version | Step limit | Outcome check before "done" | Page tools (WebMCP) |
+|---|---|---|---|
+| v0 | 30 (safety cap) | no | no |
+| v1 | 20 | no | no |
+| v2 | 20 | yes | no |
+| v3 | 20 | yes | yes |
 
 Two details, so the table is not read for more than it says. The v0 traces were written by the v0 code of the time (git tag `v0`) as one JSON file per run; since v1 every version writes a JSONL trace line by line. And from v1 on, traces also record every API response, which the agent never sees.
 
@@ -150,6 +154,21 @@ The run went on until the step limit and ended like this:
 
 The agent did not recover in that run: it had never logged in, so every later booking was answered 401. But the harness no longer reported a success that did not exist.
 
+**v3, run 9: the page's own tool answers with the real reason**
+
+```
+v3 run 9: steps=10 saidDone=true reallyBooked=true refusals=0 "Booked the Tuesday 14:00 slot for Alice."
+```
+
+The first step in `traces/v3/run-09.jsonl`: the agent calls `bookSlot` before anything else, and instead of a "Booked!" message it gets the API's answer.
+
+```json
+{"type":"http","method":"POST","path":"/api/book","status":503,"at":"2026-11-24T08:18:41.218Z"}
+{"type":"step","step":1,"action":"bookSlot","args":{"day":"Tuesday","person":"Alice","time":"14:00"},"target":"","result":"Not booked: Service unavailable.","tokens":1160}
+```
+
+It then logged in and booked through the page, by clicking.
+
 ---
 
 ## Results
@@ -161,11 +180,15 @@ Ten runs per version, same prompt, same model, same task. Generated from `traces
 | v0 | 10 | 10 | 6 | 4 |
 | v1 | 10 | 10 | 7 | 3 |
 | v2 | 10 | 8 | 8 | 0 |
+| v3 | 10 | 7 | 7 | 0 |
 
 A false success is a run where the agent said done and the booking does not exist.
 
 - **v1** added a step limit and traces. Nothing in it looks at the outcome, and false successes stayed: 3 instead of 4.
 - **v2** added the outcome check. False successes went to 0. In the 8 successful runs the agent rebooked by itself and "done" was accepted the first time. The check fired once, in run 09, shown above. Runs 02 and 09 ended at the step limit, reported as not done, which is what happened.
+- **v3** added the page's `bookSlot` tool. False successes stayed at 0 and 7 runs booked, one fewer than v2. The agent called the tool 8 times, in 8 of the 10 runs and never twice in a run. It answered `Not booked: Service unavailable.` 7 times (the injected 503) and `Not booked: Not logged in.` once. No booking was made through the tool: all 7 were made by clicking "Book". Runs 01, 03 and 06 ended at the step limit; in none of them was the agent logged in when it tried to book.
+
+**Across the four versions the agent finished the job about as often: 6, 7, 8 and 7 runs out of 10. What changed is how often the harness reported a booking that did not exist: 4, 3, 0 and 0. The outcome check did that. The tool told the agent the truth each time it was called, and that did not make the agent book more often.**
 
 ### The fault is injected on purpose
 
@@ -207,16 +230,18 @@ npm test                    # replays every version with a scripted model, no to
 - `--out <dir>` picks the folder. In a folder that already has traces, complete runs are skipped, so a batch that stops halfway resumes with the same command. The measured batches were written this way: `npm run agent -- v2 10 --out traces/v2`.
 - `npm run report` rebuilds `docs/results.md` from `traces/` only.
 - To use the app by hand: `npm run api`, then open http://localhost:4300. The demo account is shown on the login page. The fault is off in that mode; turn it on with `FAULT_FIRST_BOOK=503 npm run api`.
-- Free tier budget: the 10 runs of one version used between 96,737 and 133,634 tokens here, against a limit of 200,000 tokens per day. One version per day fits; two do not.
+- Free tier budget: the 10 runs of one version used between 96,737 and 143,841 tokens here, against a limit of 200,000 tokens per day. One version per day fits; two do not.
 
 ---
 
 ## Limits
 
-- **Ten runs per version.** Enough to see 4 false successes go to 0, not enough to claim a rate. The difference between v0 (4) and v1 (3) is within what chance alone produces at this size.
+- **Ten runs per version.** Enough to see 4 false successes go to 0, not enough to claim a rate. Differences of one run, such as v0 to v1 (4 to 3 false successes) or v2 to v3 (8 to 7 bookings), are within what chance alone produces at this size.
 - **One small free model, one task, one app.** Nothing here says how another model would behave.
 - **The app is built to fail.** The optimistic message and the injected 503 are deliberate. They are common failures in real applications, but here they are staged.
 - **The outcome check knows the answer.** `6-verify.ts` is written for this one task and reads a harness-only endpoint of the API. A general agent needs a check per task, and that is the hard part.
+- **WebMCP is experimental.** Angular's API for it is marked experimental and the browser API is not shipped in Playwright's Chromium, so the app loads a polyfill (`@w3c/webmcp-polyfill`). All of it may change.
+- **The tool was barely exercised.** It was called 8 times and each call hit an error, 7 of them the injected one. These runs say nothing about how the agent behaves when the tool succeeds.
 - **Some v0 explanations are inferred.** v0 traces did not record HTTP statuses, so the rejection reasons for runs 06 and 07 come from reading `api/server.ts`. From v1 on they are recorded.
 
 ---
@@ -225,6 +250,7 @@ npm test                    # replays every version with a scripted model, no to
 
 - Mitchell Hashimoto, [My AI Adoption Journey](https://mitchellh.com/writing/my-ai-adoption-journey) (February 2026): the origin of "harness engineering".
 - Playwright, [ARIA snapshots](https://playwright.dev/docs/aria-snapshots): how the agent sees the page and points at elements.
+- Angular, [WebMCP](https://angular.dev/ai/webmcp), and Chrome, [WebMCP imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api): how the app declares `bookSlot` and how the harness finds and calls it.
 - Groq, [OpenAI compatibility](https://console.groq.com/docs/openai) and [tool use](https://console.groq.com/docs/tool-use): how the model is called.
 
 ## Credits

@@ -7,6 +7,8 @@ export interface Slot { day: string; time: string; bookedBy: string | null }
 export class Api {
   readonly token = signal<string | null>(null);
   readonly toast = signal<string | null>(null);
+  /** Bumped after every booking attempt, so the calendar reloads. */
+  readonly attempts = signal(0);
 
   async login(email: string, password: string): Promise<boolean> {
     const res = await this.post('/api/login', { email, password });
@@ -26,6 +28,7 @@ export class Api {
   /** Resolves to null on success, or to the API's error message. */
   async book(day: string, time: string, name: string): Promise<string | null> {
     const res = await this.post('/api/book', { day, time, name });
+    this.attempts.update((n) => n + 1);
     if (res.ok) return null;
     return ((await res.json()) as { error: string }).error;
   }

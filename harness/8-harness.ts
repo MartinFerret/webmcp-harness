@@ -16,10 +16,11 @@ import { checkOutcome, reallyBooked } from './6-verify.ts';
 process.env['FAULT_FIRST_BOOK'] ??= '503';
 
 /** What each version of the harness adds. Prompt, task and model never change. */
-export const VERSIONS: Record<string, { maxSteps: number; checkOutcome?: boolean }> = {
+export const VERSIONS: Record<string, { maxSteps: number; checkOutcome?: boolean; pageTools?: boolean }> = {
   v0: { maxSteps: 30 }, // naive loop, safety cap only
   v1: { maxSteps: 20 }, // step limit + JSONL traces
   v2: { maxSteps: 20, checkOutcome: true }, // "done" is only accepted if the booking really exists
+  v3: { maxSteps: 20, checkOutcome: true, pageTools: true }, // v2 + the page's WebMCP tools
 };
 
 const APP = 'http://localhost:4300';
@@ -63,6 +64,7 @@ export async function runHarness(version: string, runs: number, dir: string, onR
     const outcome = await runAgent(page, system, taskFile.trim(), {
       maxSteps: config.maxSteps,
       onStep: (step) => log({ type: 'step', ...step }),
+      pageTools: config.pageTools === true,
       ...(config.checkOutcome && { checkOutcome: () => checkOutcome(APP) }),
     });
     const result = {
