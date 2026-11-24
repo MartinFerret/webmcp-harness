@@ -243,6 +243,7 @@ npm test                    # replays every version with a scripted model, no to
 - Your traces go to a fresh, timestamped folder under `runs/` (gitignored), printed on the first line. The committed traces in `traces/` are never skipped or overwritten.
 - `--out <dir>` picks the folder. In a folder that already has traces, complete runs are skipped, so a batch that stops halfway resumes with the same command. The measured batches were written this way: `npm run agent -- v2 10 --out traces/v2`.
 - `npm run report` rebuilds `docs/results.md` from `traces/` only.
+- What `npm run demo -- v2` prints, from one real run: [docs/demo-v2.txt](docs/demo-v2.txt). That run is not one of the ten measured runs.
 - To use the app by hand: `npm run api`, then open http://localhost:4300. The demo account is shown on the login page. The fault is off in that mode; turn it on with `FAULT_FIRST_BOOK=503 npm run api`.
 - Free tier budget: the 10 runs of one version used between 96,737 and 143,841 tokens here, against a limit of 200,000 tokens per day. One version per day fits; two do not.
 

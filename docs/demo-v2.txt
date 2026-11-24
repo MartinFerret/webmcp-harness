@@ -1,0 +1,29 @@
+
+> webmcp-harness@0.0.0 demo
+> tsx harness/demo.ts v2
+
+SlotBook on http://localhost:4300
+
+v2 · openai/gpt-oss-20b · step limit 20 · first booking answers 503
+Task: Book the Tuesday 14:00 slot for Alice.
+
+   1.  click    link "Log in"  ->  ok
+   2.  type     textbox "Email" "demo@slotbook.test"  ->  ok
+   3.  type     textbox "Password" "demo"  ->  ok
+        API  POST /api/login -> 200
+   4.  click    button "Log in"  ->  ok
+   5.  click    button "14:00"  ->  ok
+   6.  type     textbox "Name" "Alice"  ->  ok
+        API  POST /api/book -> 503
+   7.  click    button "Book"  ->  ok
+   8.  click    button "Dismiss"  ->  ok
+   9.  click    button "14:00"  ->  ok
+  10.  type     textbox "Name" "Alice"  ->  ok
+        API  POST /api/book -> 201
+  11.  click    button "Book"  ->  ok
+  12.  done     {"summary":"Booked the Tuesday 14:00 slot for Alice."}  ->  stopped
+
+Agent says done:  yes, "Booked the Tuesday 14:00 slot for Alice."
+Really booked:    yes
+12 steps, 9584 tokens. Trace: runs/2026-11-24T14-07-24-227Z-demo-v2/run-01.jsonl
+
