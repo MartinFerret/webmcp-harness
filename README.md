@@ -98,6 +98,7 @@ task → [tools + context + guardrails + loop + verify + page tools] → trace +
 | `7-webmcp.ts` | WebMCP | Asks the page which tools it exposes (`document.modelContext`), offers them to the model next to `click`, `type` and `done`, and calls them in the page. The tool's answer goes back to the agent word for word, and into the trace. |
 | `8-harness.ts` | The harness | Owns the run: starts SlotBook, opens the browser, resets the app, plugs each version's parts into the loop, writes the trace, closes the browser. |
 | `9-index.ts` | CLI | `npm run agent -- <version> <runs> [--out <dir>]`: one line per run in the terminal, traces in a fresh folder under `runs/` unless `--out` says otherwise. |
+| `demo.ts` | Demo | `npm run demo -- <version>`: one run in a visible, slowed-down browser, each step and each API answer printed as it happens. Not a harness part. |
 | `report.ts` | Report | `npm run report`: rebuilds `docs/results.md` from `traces/`. Not a harness part. |
 
 On the app side, the tool is declared in `app/src/app/webmcp.ts` with Angular's experimental WebMCP API: `bookSlot(person, day, time)` checks its input, makes the same API call as the "Book" button, and returns what the API really answered, for example `Not booked: Not logged in.` It gets no shortcut: the same login requirement, the same injected fault.
@@ -223,6 +224,7 @@ Then run a version:
 
 ```sh
 npm run agent -- v2 10      # ten runs of v2, one line each
+npm run demo -- v0          # one run you can watch: visible browser, every step printed
 npm test                    # replays every version with a scripted model, no tokens
 ```
 

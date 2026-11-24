@@ -6,7 +6,7 @@
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import { mkdir, readFile } from 'node:fs/promises';
-import { chromium } from 'playwright';
+import { chromium, type LaunchOptions } from 'playwright';
 import '../api/server.ts'; // starts SlotBook on :4300
 import { MODEL } from './2-model.ts';
 import { runAgent } from './5-loop.ts';
@@ -28,8 +28,18 @@ const sha256 = (text: string) => createHash('sha256').update(text).digest('hex')
 
 export interface RunResult { run: number; saidDone: boolean; reallyBooked: boolean; summary: string; refusals: number; steps: number; tokens: number }
 
+/** For watching a run (see demo.ts). None of it changes what the agent sees or does. */
+export interface Watch {
+  /** Browser launch options, e.g. a visible, slowed-down window. */
+  launch?: LaunchOptions;
+  /** Called with every line written to the trace, as it happens. */
+  onLine?: (line: Record<string, unknown>) => void;
+  /** Keep the page open this long after the run, so the final state can be seen. */
+  lingerMs?: number;
+}
+
 /** Runs one version `runs` times, one trace file per run in `dir`. */
-export async function runHarness(version: string, runs: number, dir: string, onResult: (result: RunResult) => void): Promise<void> {
+export async function runHarness(version: string, runs: number, dir: string, onResult: (result: RunResult) => void, watch: Watch = {}): Promise<void> {
   const config = VERSIONS[version];
   if (!config) throw new Error(`Unknown version "${version}". Known: ${Object.keys(VERSIONS).join(', ')}`);
 
@@ -37,13 +47,16 @@ export async function runHarness(version: string, runs: number, dir: string, onR
   const taskFile = await readFile('tasks/book.md', 'utf8');
 
   await mkdir(dir, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(watch.launch);
 
   for (let i = 1; i <= runs; i++) {
     const file = `${dir}/run-${String(i).padStart(2, '0')}.jsonl`;
     if (existsSync(file) && readFileSync(file, 'utf8').includes('"type":"result"')) continue;
     rmSync(file, { force: true }); // an interrupted run starts over
-    const log = (line: object) => appendFileSync(file, JSON.stringify(line) + '\n');
+    const log = (line: Record<string, unknown>) => {
+      appendFileSync(file, JSON.stringify(line) + '\n');
+      watch.onLine?.(line);
+    };
 
     await fetch(`${APP}/__reset`, { method: 'POST' });
     const page = await browser.newPage();
@@ -73,6 +86,7 @@ export async function runHarness(version: string, runs: number, dir: string, onR
       steps: outcome.steps.length, tokens: outcome.steps.reduce((sum, s) => sum + s.tokens, 0),
     };
     log(result);
+    if (watch.lingerMs) await page.waitForTimeout(watch.lingerMs);
     await page.close();
     onResult({ run: i, ...result });
   }
